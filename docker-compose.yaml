@@ -1,33 +1,42 @@
 version: '3'
 services:
-    express-typescript:
+    reBarato-backend:
         build:
             context: .
             dockerfile: local.Dockerfile
-        container_name: 'app-express-typescript'
+        container_name: 'reBarato-backend'
         volumes:
             - .:/usr/src/app/
         working_dir: /usr/src/app
         environment:
             - REDIS_QUEUE_HOST=redis
-            - MONGOOSE_URL=mongodb://mongo:27017/typescript_mongoose
+            - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/re_barato_db
             - GOOGLE_ID=
             - GOOGLE_SECRET=
-            - TWITTER_KEY=
-            - TWITTER_SECRET=
         command: sh -c "npm install && npm run dev"
         ports:
             - 4040:4040
             - 5550:5550
+        depends_on:
+            - postgres
     redis:
         image: "redis"
         ports:
-        - "6379:6379"
+            - "6379:6379"
         expose:
-        - 6379
-    mongo:
-        image: "mongo"
+            - 6379
+    postgres:
+        image: "postgres:15-alpine"
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=re_barato_db
         ports:
-        - "27017:27017"
+            - "5432:5432"
         expose:
-        - 27017
+            - 5432
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+volumes:
+    postgres_data:
